@@ -1,0 +1,17 @@
+import api, { toFormData } from './axios.js';
+
+export const offersApi = {
+  getPublic: () => api.get('/offers/public').then((r) => r.data.data),
+  getAll: () => api.get('/offers').then((r) => r.data.data),
+  create: (data, file) => {
+    const form = toFormData(data);
+    if (file) form.append('image', file);
+    return api.post('/offers', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data.data);
+  },
+  update: (id, data, file) => {
+    const form = toFormData(data);
+    if (file) form.append('image', file);
+    return api.put(`/offers/${id}`, form, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data.data);
+  },
+  delete: (id) => api.delete(`/offers/${id}`),
+};
