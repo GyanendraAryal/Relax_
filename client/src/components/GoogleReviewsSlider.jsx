@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 export default function GoogleReviewSlider() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const sliderRef = useRef(null);
 
   useEffect(() => {
     async function fetchReviews() {
       try {
-        const res = await fetch('/api/google-reviews'); 
+        const res = await fetch('/api/google-reviews');
         const data = await res.json();
         setReviews(data.reviews || []);
       } catch (err) {
@@ -20,6 +21,32 @@ export default function GoogleReviewSlider() {
 
     fetchReviews();
   }, []);
+
+  // AUTO SLIDER
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider || reviews.length === 0) return;
+
+    const interval = setInterval(() => {
+      const cardWidth = 316; // 300px card + gap
+
+      const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
+
+      if (slider.scrollLeft + cardWidth >= maxScrollLeft) {
+        slider.scrollTo({
+          left: 0,
+          behavior: 'smooth',
+        });
+      } else {
+        slider.scrollBy({
+          left: cardWidth,
+          behavior: 'smooth',
+        });
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [reviews]);
 
   if (loading) {
     return (
@@ -34,7 +61,6 @@ export default function GoogleReviewSlider() {
   return (
     <section className="bg-stone-50 py-14">
       <div className="mx-auto max-w-6xl px-4">
-        
         <h2 className="text-2xl font-bold font-display text-forest-900">
           What Customers Say
         </h2>
@@ -42,7 +68,10 @@ export default function GoogleReviewSlider() {
           Real reviews from Google
         </p>
 
-        <div className="mt-8 flex gap-4 overflow-x-auto scroll-smooth pb-4">
+        <div
+          ref={sliderRef}
+          className="mt-8 flex gap-4 overflow-x-auto scroll-smooth pb-4 scrollbar-hide"
+        >
           {reviews.map((r, i) => (
             <motion.div
               key={i}
@@ -53,15 +82,23 @@ export default function GoogleReviewSlider() {
               <div className="flex items-center">
                 <img
                   src={r.profile_photo_url || "/avatar-fallback.png"}
-                  onError={(e) => { e.target.src = "/avatar-fallback.png"; }}
+                  onError={(e) => {
+                    e.target.src = "/avatar-fallback.png";
+                  }}
                   referrerPolicy="no-referrer"
                   alt={r.author_name || "User"}
                   className="w-10 h-10 rounded-full object-cover border border-stone-100 mr-3 shrink-0 bg-stone-50"
                 />
+
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-stone-900 text-sm truncate">{r.author_name}</h4>
-                  <span className="text-[10px] text-stone-400 font-medium block mt-0.5">{r.relative_time_description}</span>
+                  <h4 className="font-semibold text-stone-900 text-sm truncate">
+                    {r.author_name}
+                  </h4>
+                  <span className="text-[10px] text-stone-400 font-medium block mt-0.5">
+                    {r.relative_time_description}
+                  </span>
                 </div>
+
                 <div className="flex items-center text-yellow-400 text-xs shrink-0 self-start mt-0.5 ml-2">
                   {"★".repeat(Math.round(r.rating || 5))}
                 </div>
@@ -73,7 +110,6 @@ export default function GoogleReviewSlider() {
             </motion.div>
           ))}
         </div>
-
       </div>
     </section>
   );

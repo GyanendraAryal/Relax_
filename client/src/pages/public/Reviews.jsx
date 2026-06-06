@@ -17,7 +17,7 @@ export default function Reviews() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       
-      <h1 className="text-3xl font-bold font-display text-forest-900">
+      <h1 className="text-3xl font-bold font-display text-forest-900 text-center">
         All Reviews
       </h1>
 
