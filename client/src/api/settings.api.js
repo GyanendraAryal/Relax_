@@ -12,4 +12,12 @@ export const settingsApi = {
     }).then((r) => r.data.data);
   },
   deleteHeroImage: () => api.delete('/settings/hero-image').then((r) => r.data.data),
+  uploadStoryImage: (file) => {
+    const form = new FormData();
+    form.append('image', file);
+    return api.post('/settings/story-image', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data.data);
+  },
+  deleteStoryImage: () => api.delete('/settings/story-image').then((r) => r.data.data),
 };

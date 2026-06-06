@@ -44,4 +44,24 @@ export async function deleteHeroImage(req, res, next) {
   } catch (err) {
     next(err);
   }
+} 
+
+// Story image handlers
+export async function uploadStoryImage(req, res, next) {
+  try {
+    const updatedStory = await settingsService.uploadStoryImage(req.file);
+    return success(res, updatedStory);
+  } catch (err) {
+    next(err);
+  }
 }
+
+export async function deleteStoryImage(req, res, next) {
+  try {
+    const updatedStory = await settingsService.deleteStoryImage();
+    return success(res, updatedStory);
+  } catch (err) {
+    next(err);
+  }
+}
+
