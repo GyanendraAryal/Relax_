@@ -11,7 +11,13 @@ export default function EventRequests() {
   const [filter, setFilter] = useState('');
 
   const load = () =>
-    bookingsApi.listEvents({ page: 1, limit: 50, status: filter || undefined }).then((r) => setItems(r.items));
+    bookingsApi
+      .listEvents({
+        page: 1,
+        limit: 50,
+        status: filter || undefined,
+      })
+      .then((r) => setItems(r.items));
 
   useEffect(() => {
     load().finally(() => setLoading(false));
@@ -27,31 +33,94 @@ export default function EventRequests() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Event Requests</h1>
-      <select className="input-field mt-4 max-w-xs" value={filter} onChange={(e) => setFilter(e.target.value)}>
+
+      {/* FILTER */}
+      <select
+        className="input-field mt-4 max-w-xs"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      >
         <option value="">All statuses</option>
         {statuses.map((s) => (
-          <option key={s} value={s}>{s}</option>
+          <option key={s} value={s}>
+            {s}
+          </option>
         ))}
       </select>
-      <div className="mt-6 space-y-4">
-        {items.map((r) => (
-          <div key={r.id} className="card">
-            <div className="flex flex-wrap justify-between gap-2">
-              <h3 className="font-semibold">{r.customer_name} — {r.event_type}</h3>
-              <span className="rounded-full bg-stone-100 px-3 py-1 text-xs capitalize">{r.status}</span>
-            </div>
-            <p className="mt-2 text-sm text-stone-600">{r.email} · {r.phone}</p>
-            <p className="text-sm">{formatDate(r.event_date)} · {r.guest_count} guests · {r.budget_range || 'Budget N/A'}</p>
-            {r.message && <p className="mt-2 text-sm italic">{r.message}</p>}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {statuses.filter((s) => s !== r.status).map((s) => (
-                <button key={s} type="button" onClick={() => updateStatus(r.id, s)} className="btn-secondary text-xs py-1 px-2">
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+
+      {/* TABLE */}
+      <div className="mt-6 overflow-x-auto">
+        <table className="w-full text-left text-sm border border-stone-200">
+          <thead className="bg-stone-50">
+            <tr>
+              <th className="p-3 border-b">Customer</th>
+              <th className="p-3 border-b">Contact</th>
+              <th className="p-3 border-b">Event</th>
+              <th className="p-3 border-b">Date</th>
+              <th className="p-3 border-b">Guests</th>
+              <th className="p-3 border-b">Budget</th>
+              <th className="p-3 border-b">Status</th>
+              <th className="p-3 border-b">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {items.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="8"
+                  className="p-6 text-center text-stone-500"
+                >
+                  No event requests found
+                </td>
+              </tr>
+            ) : (
+              items.map((r) => (
+                <tr key={r.id} className="border-b hover:bg-stone-50">
+                  <td className="p-3 font-medium">{r.customer_name}</td>
+
+                  <td className="p-3">
+                    <div>{r.email}</div>
+                    <div className="text-xs text-stone-500">{r.phone}</div>
+                  </td>
+
+                  <td className="p-3">{r.event_type}</td>
+
+                  <td className="p-3">{formatDate(r.event_date)}</td>
+
+                  <td className="p-3">{r.guest_count}</td>
+
+                  <td className="p-3">
+                    {r.budget_range || 'Budget N/A'}
+                  </td>
+
+                  <td className="p-3">
+                    <span className="rounded-full bg-stone-100 px-3 py-1 text-xs capitalize">
+                      {r.status}
+                    </span>
+                  </td>
+
+                  <td className="p-3">
+                    <div className="flex flex-wrap gap-1">
+                      {statuses
+                        .filter((s) => s !== r.status)
+                        .map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => updateStatus(r.id, s)}
+                            className="btn-secondary text-xs px-2 py-1"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
