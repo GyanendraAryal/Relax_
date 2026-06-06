@@ -12,6 +12,13 @@ export async function getPublicMenu() {
   return menuModel.getMenuGrouped(true);
 }
 
+export async function getCategoriesWithItems() {
+  const categoriesWithItems = await menuModel.getMenuGrouped(true);
+  // Hide categories with zero active items
+  return categoriesWithItems.filter((cat) => cat.items && cat.items.length > 0);
+}
+
+
 export async function listCategories(activeOnly = false) {
   return menuModel.findAllCategories({ activeOnly });
 }
@@ -43,6 +50,11 @@ export async function deleteCategory(id) {
 export async function listItems(filters) {
   return menuModel.findAllItems(filters);
 }
+
+export async function listItemsPaginated(filters) {
+  return menuModel.findAllItemsPaginated(filters);
+}
+
 
 export async function getItem(id) {
   const item = await menuModel.findItemById(id);

@@ -75,6 +75,78 @@ export async function findAllItems({ categoryId, availableOnly = false, featured
   return rows;
 }
 
+export async function findAllItemsPaginated({
+  categoryId,
+  search,
+  availableOnly = false,
+  featuredOnly = false,
+  sortBy,
+  sortOrder = 'asc',
+  page = 1,
+  limit = 10,
+} = {}) {
+  let whereClauses = ['1=1'];
+  const params = [];
+  let i = 1;
+
+  if (categoryId) {
+    whereClauses.push(`mi.category_id = $${i++}`);
+    params.push(categoryId);
+  }
+  if (availableOnly) {
+    whereClauses.push(`mi.is_available = TRUE AND mc.is_active = TRUE`);
+  }
+  if (featuredOnly) {
+    whereClauses.push(`mi.is_featured = TRUE`);
+  }
+  if (search) {
+    // Split query parameter for ILIKE search
+    whereClauses.push(`(mi.name ILIKE $${i++} OR mi.description ILIKE $${i++})`);
+    params.push(`%${search}%`);
+    params.push(`%${search}%`);
+  }
+
+  const whereSql = whereClauses.join(' AND ');
+
+  // Get total count
+  const countSql = `
+    SELECT COUNT(*)::int AS total
+    FROM menu_items mi
+    JOIN menu_categories mc ON mc.id = mi.category_id
+    WHERE ${whereSql}`;
+  const countRes = await pool.query(countSql, params);
+  const total = countRes.rows[0]?.total || 0;
+
+  // Sorting
+  let orderBySql = 'ORDER BY mc.sort_order, mi.sort_order, mi.name';
+  if (sortBy === 'category') {
+    orderBySql = `ORDER BY mc.name ${sortOrder === 'desc' ? 'DESC' : 'ASC'}, mi.sort_order ASC`;
+  } else if (sortBy === 'display_order') {
+    orderBySql = `ORDER BY mi.sort_order ${sortOrder === 'desc' ? 'DESC' : 'ASC'}, mi.name ASC`;
+  } else if (sortBy === 'price') {
+    orderBySql = `ORDER BY mi.price ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  } else if (sortBy === 'name') {
+    orderBySql = `ORDER BY mi.name ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  }
+
+  // Pagination
+  const offset = (page - 1) * limit;
+  const dataParams = [...params];
+  const itemsSql = `
+    SELECT mi.*, mc.name AS category_name, mc.slug AS category_slug
+    FROM menu_items mi
+    JOIN menu_categories mc ON mc.id = mi.category_id
+    WHERE ${whereSql}
+    ${orderBySql}
+    LIMIT $${i++} OFFSET $${i++}`;
+  
+  dataParams.push(limit, offset);
+
+  const { rows } = await pool.query(itemsSql, dataParams);
+  return { rows, total };
+}
+
+
 export async function findItemById(id) {
   const { rows } = await pool.query(
     `SELECT mi.*, mc.name AS category_name FROM menu_items mi

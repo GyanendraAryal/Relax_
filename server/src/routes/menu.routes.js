@@ -9,6 +9,8 @@ import { upload } from '../middlewares/upload.js';
 const router = Router();
 
 router.get('/public', menuController.getPublicMenu);
+router.get('/categories-with-items', menuController.getCategoriesWithItems);
+
 
 router.use(authenticate, attachUser);
 

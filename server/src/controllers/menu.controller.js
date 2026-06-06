@@ -10,6 +10,16 @@ export async function getPublicMenu(req, res, next) {
   }
 }
 
+export async function getCategoriesWithItems(req, res, next) {
+  try {
+    const menu = await menuService.getCategoriesWithItems();
+    return success(res, menu);
+  } catch (err) {
+    next(err);
+  }
+}
+
+
 export async function listCategories(req, res, next) {
   try {
     const categories = await menuService.listCategories(false);
@@ -54,6 +64,31 @@ export async function listItems(req, res, next) {
     next(err);
   }
 }
+
+export async function listItemsPaginated(req, res, next) {
+  try {
+    const categoryId = req.query.category_id ? Number(req.query.category_id) : undefined;
+    const search = req.query.search || undefined;
+    const sortBy = req.query.sortBy || undefined;
+    const sortOrder = req.query.sortOrder || 'asc';
+    const page = req.query.page ? Number(req.query.page) : 1;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+
+    const { rows, total } = await menuService.listItemsPaginated({
+      categoryId,
+      search,
+      sortBy,
+      sortOrder,
+      page,
+      limit,
+    });
+
+    return paginated(res, rows, { page, limit, total });
+  } catch (err) {
+    next(err);
+  }
+}
+
 
 export async function getItem(req, res, next) {
   try {
