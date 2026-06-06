@@ -80,10 +80,43 @@ export default function Home() {
         </div>
       </section>
 
-      <OurStorySection story={settings?.story || {}} />
-      <TodaySpecialSection />
-      <GoogleReviewSlider />
-      <AboutSection about={about} />
+      {/* ── ANIMATED CHILD SECTIONS ── */}
+      
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        <OurStorySection story={settings?.story || {}} />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        <TodaySpecialSection />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        <GoogleReviewSlider />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+      >
+        <AboutSection about={about} />
+      </motion.div>
     </>
   );
 }

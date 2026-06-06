@@ -12,11 +12,21 @@ export default function OurStorySection({ story = {} }) {
     backgroundImage = '',
   } = story;
 
+  // Working cloud image fallback to see the blend immediately
+  const liveFallbackImage = "https://unsplash.com";
+
   return (
-    <section className="bg-white py-20 border-t border-b border-stone-100/60">
-      <div className="mx-auto max-w-6xl px-4 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-        
-        {/* Left Column - Text Content */}
+    <section className="relative bg-gradient-to-b from-white via-stone-50 to-white py-24 overflow-hidden">
+
+      {/* Soft background glow for blending */}
+      <div className="absolute inset-0">
+        <div className="absolute -top-20 right-0 w-96 h-96 bg-brand-200/20 blur-3xl rounded-full" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-200/10 blur-3xl rounded-full" />
+      </div>
+
+      <div className="relative mx-auto max-w-6xl px-4 grid grid-cols-1 md:grid-cols-12 gap-14 items-center">
+
+        {/* LEFT - TEXT */}
         <div className="md:col-span-7 space-y-6">
           <motion.div
             initial={{ opacity: 0, x: -24 }}
@@ -24,32 +34,27 @@ export default function OurStorySection({ story = {} }) {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            {/* Tag label with line underneath */}
             <div className="inline-block relative pb-2 mb-4">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-stone-400 font-display">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-stone-400">
                 {label}
               </span>
-              <span className="absolute bottom-0 left-0 w-8 h-[2px] bg-brand-500" />
+              <span className="absolute bottom-0 left-0 w-10 h-[2px] bg-brand-500" />
             </div>
 
-            {/* Main Header */}
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-light text-stone-800 leading-tight">
-              {headline} <span className="font-bold text-stone-900">{headlineBold}</span>
+              {headline}{' '}
+              <span className="font-bold text-stone-900">{headlineBold}</span>
             </h2>
 
-            {/* Paragraph Description */}
             <div className="mt-8 space-y-5 text-stone-600 leading-relaxed text-sm md:text-base">
               <p>{paragraph1}</p>
               {paragraph2 && <p>{paragraph2}</p>}
             </div>
 
-            {/* Sign-off Signature */}
             {(signOff || signOffSub) && (
-              <div className="mt-8 pt-6 border-t border-stone-100/80 text-stone-700">
+              <div className="mt-8 pt-6 border-t border-stone-200/60 text-stone-700">
                 {signOff && (
-                  <p className="text-sm font-medium italic">
-                    {signOff}
-                  </p>
+                  <p className="text-sm font-medium italic">{signOff}</p>
                 )}
                 {signOffSub && (
                   <p className="text-xs uppercase tracking-wider text-stone-400 mt-1 font-semibold">
@@ -61,21 +66,46 @@ export default function OurStorySection({ story = {} }) {
           </motion.div>
         </div>
 
-        {/* Right Column - Image Content */}
+        {/* RIGHT - BLENDED IMAGE */}
         <div className="md:col-span-5">
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative w-full aspect-[3/4] rounded-lg overflow-hidden shadow-2xl border border-stone-100 bg-stone-50"
-          >
-            <img
-              src={backgroundImage || '/story-bg.jpg'}
-              alt="Relax Station Story"
-              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-            />
-          </motion.div>
+          <div className="relative p-8 -m-8 overflow-visible">
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative aspect-[3/4] rounded-2xl overflow-hidden group shadow-[-25px_25px_50px_-15px_rgba(0,0,0,0.25)]"
+            >
+              {/* IMAGE */}
+              <img
+                src={backgroundImage || liveFallbackImage}
+                alt="Relax Station Story"
+                className="h-full w-full object-cover scale-105 transition-transform duration-700 group-hover:scale-110"
+              />
+
+              {/* INSET LEFT SHADOW MASK MATCHING STONE-50 GRADIENT */}
+              <div 
+                className="absolute inset-0 pointer-events-none z-10" 
+                style={{
+                  background: 'linear-gradient(to right, rgba(250,249,246,0.95) 0%, rgba(250,249,246,0.6) 12%, rgba(250,249,246,0) 40%)'
+                }}
+              />
+
+              {/* INSET TOP SHADOW MASK MATCHING WHITE GRADIENT */}
+              <div 
+                className="absolute inset-0 pointer-events-none z-10" 
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 8%, rgba(255,255,255,0) 25%)'
+                }}
+              />
+
+              {/* DARK TO LIGHT GRADIENT OVERLAY */}
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/30 via-stone-900/5 to-transparent pointer-events-none" />
+
+              {/* SOFT EDGE BLUR */}
+              <div className="absolute -inset-1 blur-xl opacity-10 bg-white pointer-events-none" />
+            </motion.div>
+          </div>
         </div>
 
       </div>
