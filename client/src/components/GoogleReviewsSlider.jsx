@@ -51,18 +51,13 @@ export default function GoogleReviewSlider() {
               className="min-w-[300px] max-w-[300px] bg-white border border-stone-200 rounded-2xl p-5 shadow-sm"
             >
               <div className="flex items-center">
-                {r.profile_photo_url ? (
-                  <img
-                    src={r.profile_photo_url}
-                    alt={r.author_name}
-                    className="w-10 h-10 rounded-full object-cover border border-stone-100 mr-3 shrink-0"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-brand-50 text-brand-600 font-bold flex items-center justify-center text-sm mr-3 shrink-0 border border-stone-100">
-                    {r.author_name?.charAt(0) || 'U'}
-                  </div>
-                )}
+                <img
+                  src={r.profile_photo_url || "/avatar-fallback.png"}
+                  onError={(e) => { e.target.src = "/avatar-fallback.png"; }}
+                  referrerPolicy="no-referrer"
+                  alt={r.author_name || "User"}
+                  className="w-10 h-10 rounded-full object-cover border border-stone-100 mr-3 shrink-0 bg-stone-50"
+                />
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-stone-900 text-sm truncate">{r.author_name}</h4>
                   <span className="text-[10px] text-stone-400 font-medium block mt-0.5">{r.relative_time_description}</span>

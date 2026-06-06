@@ -53,7 +53,18 @@ export const getGoogleReviews = async (req, res) => {
 
     // 2. Look up google configs in settings
     const row = await settingsModel.findByKey('google');
-    const googleSettings = row ? row.value : {};
+    let googleSettings = {};
+    if (row) {
+      if (typeof row.value === 'string') {
+        try {
+          googleSettings = JSON.parse(row.value);
+        } catch {
+          googleSettings = {};
+        }
+      } else if (row.value && typeof row.value === 'object') {
+        googleSettings = row.value;
+      }
+    }
 
     const placeId = googleSettings.placeId || process.env.GOOGLE_PLACE_ID;
     const apiKey = googleSettings.apiKey || process.env.GOOGLE_MAPS_API_KEY;
@@ -62,6 +73,7 @@ export const getGoogleReviews = async (req, res) => {
       reviews: MOCK_REVIEWS,
       rating: 4.8,
       total: 154,
+      source: "mock"
     };
 
     if (placeId && apiKey) {
@@ -70,12 +82,20 @@ export const getGoogleReviews = async (req, res) => {
         const response = await axios.get(url);
         
         if (response.data.status === "OK" && response.data.result) {
-          const apiReviews = response.data.result.reviews || [];
-          if (apiReviews.length > 0) {
+          const rawReviews = response.data.result.reviews || [];
+          if (rawReviews.length > 0) {
+            const apiReviews = rawReviews.map(r => ({
+              author_name: r.author_name || "Anonymous",
+              rating: typeof r.rating === 'number' ? r.rating : 5,
+              text: r.text || "",
+              relative_time_description: r.relative_time_description || "",
+              profile_photo_url: r.profile_photo_url || r.authorAttribution?.photoUri || "",
+            }));
+
             data = {
               reviews: apiReviews,
-              rating: response.data.result.rating || 4.8,
-              total: response.data.result.user_ratings_total || apiReviews.length,
+              rating: typeof response.data.result.rating === 'number' ? response.data.result.rating : 4.8,
+              total: typeof response.data.result.user_ratings_total === 'number' ? response.data.result.user_ratings_total : apiReviews.length,
             };
           } else {
             console.warn("Google API returned OK but 0 reviews. Falling back to mock reviews.");
