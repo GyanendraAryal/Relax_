@@ -262,90 +262,34 @@ export default function SiteSettings() {
         <section className="card space-y-3">
           <h2 className="font-semibold">Our Story Section</h2>
           <div className="space-y-2 pt-2">
-            {/* Story Section Label */}
-  <div>
-    <label className="text-sm font-medium block mb-1">Story Label</label>
-    <input
-      className="input-field w-full"
-      placeholder="e.g. OUR STORY"
-      value={settings.story?.label || ''}
-      onChange={(e) => updateSection('story', 'label', e.target.value)}
-    />
-  </div>
+            {/* Story Headline */}
+            <div>
+              <label className="text-sm font-medium block mb-1">Story Headline</label>
+              <input
+                className="input-field w-full"
+                placeholder="Enter headline"
+                value={settings.story?.headline || ''}
+                onChange={(e) => updateSection('story', 'headline', e.target.value)}
+              />
+            </div>
 
-  {/* Story Headline (Normal & Bold) */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <label className="text-sm font-medium block mb-1">Headline (Normal Part)</label>
-      <input
-        className="input-field w-full"
-        placeholder="e.g. Welcome To"
-        value={settings.story?.headline || ''}
-        onChange={(e) => updateSection('story', 'headline', e.target.value)}
-      />
-    </div>
-    <div>
-      <label className="text-sm font-medium block mb-1">Headline (Bold Brand Part)</label>
-      <input
-        className="input-field w-full"
-        placeholder="e.g. Relax Station"
-        value={settings.story?.headlineBold || ''}
-        onChange={(e) => updateSection('story', 'headlineBold', e.target.value)}
-      />
-    </div>
-  </div>
-
-  {/* Story Content Paragraph 1 */}
-  <div>
-    <label className="text-sm font-medium block mb-1">Story Content - Paragraph 1</label>
-    <textarea
-      className="input-field w-full h-24"
-      placeholder="Write the first paragraph..."
-      value={settings.story?.paragraph1 || ''}
-      onChange={(e) => updateSection('story', 'paragraph1', e.target.value)}
-    />
-  </div>
-
-  {/* Story Content Paragraph 2 */}
-  <div>
-    <label className="text-sm font-medium block mb-1">Story Content - Paragraph 2</label>
-    <textarea
-      className="input-field w-full h-24"
-      placeholder="Write the second paragraph..."
-      value={settings.story?.paragraph2 || ''}
-      onChange={(e) => updateSection('story', 'paragraph2', e.target.value)}
-    />
-  </div>
-
-  {/* Sign-off Details */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <label className="text-sm font-medium block mb-1">Sign-off Signature</label>
-      <input
-        className="input-field w-full"
-        placeholder="e.g. -Kumar Bogati, Durga KC & all the staff"
-        value={settings.story?.signOff || ''}
-        onChange={(e) => updateSection('story', 'signOff', e.target.value)}
-      />
-    </div>
-    <div>
-      <label className="text-sm font-medium block mb-1">Sign-off Subtitle</label>
-      <input
-        className="input-field w-full"
-        placeholder="e.g. Relax Station, Owners"
-        value={settings.story?.signOffSub || ''}
-        onChange={(e) => updateSection('story', 'signOffSub', e.target.value)}
-      />
-    </div>
-  </div>
-
-            <label className="block text-sm font-semibold text-stone-700 pt-2">
-              Story Portrait Image
+            {/* Story Content */}
+            <div>
+              <label className="text-sm font-medium block mb-1">Story Content</label>
+              <textarea
+                className="input-field w-full h-24"
+                placeholder="Write your story..."
+                value={settings.story?.content || ''}
+                onChange={(e) => updateSection('story', 'content', e.target.value)}
+              />
+            </div>
+            <label className="block text-sm font-semibold text-stone-700">
+              Story Background Image
             </label>
             {settings.story?.backgroundImage ? (
               <div className="relative overflow-hidden rounded-lg border border-stone-200 bg-stone-50 p-2">
-                <div className="group relative aspect-[3/4] max-w-[200px] overflow-hidden rounded bg-stone-100">
-                  <img src={settings.story.backgroundImage} alt="Story Portrait Preview" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                <div className="group relative aspect-[21/9] w-full overflow-hidden rounded bg-stone-100">
+                  <img src={settings.story.backgroundImage} alt="Story Background Preview" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>
                 <div className="mt-2 flex items-center justify-between gap-2 px-1">
                   <span className="text-xs text-stone-500 truncate max-w-[70%]">Current Image URL</span>
@@ -358,8 +302,8 @@ export default function SiteSettings() {
               <div className="flex justify-center rounded-lg border border-dashed border-stone-300 px-6 py-8">
                 <div className="text-center space-y-2">
                   <label className="cursor-pointer font-semibold text-brand-600">
-                    {loadingStoryImage ? 'Uploading...' : 'Upload Story Portrait Image'}
-                    <input type="file" accept="image/*" className="sr-only" onChange={handleStoryImageUpload} disabled={loadingStoryImage}/>
+                    {loadingStoryImage ? 'Uploading...' : 'Upload Story Background Image'}
+                    <input type="file" accept="image/*" className="sr-only" onChange={handleStoryImageUpload} disabled={loadingStoryImage} />
                   </label>
                   <p className="text-xs text-stone-500">Recommended: High resolution portrait image</p>
                 </div>
@@ -488,5 +432,5 @@ export default function SiteSettings() {
         </div>
       </form>
     </div>
-  );
-}
+  )
+};
