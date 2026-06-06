@@ -16,6 +16,7 @@ import TodaySpecial from './pages/admin/TodaySpecial.jsx';
 import BirthdayRequests from './pages/admin/BirthdayRequests.jsx';
 import EventRequests from './pages/admin/EventRequests.jsx';
 import SiteSettings from './pages/admin/SiteSettings.jsx';
+import Contact from './pages/public/Contact.jsx';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="offers" element={<Offers />} />
           <Route path="book-birthday" element={<BookBirthday />} />
           <Route path="book-event" element={<BookEvent />} />
+          <Route path="contact" element={<Contact />} />
         </Route>
 
         <Route path="/admin/login" element={<AdminLogin />} />

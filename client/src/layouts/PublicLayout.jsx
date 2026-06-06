@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { loadSettings } from '../app/slices/settingsSlice.js';
 import logo from '../assets/logo.png';
+import { FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -12,6 +13,7 @@ const navLinks = [
   { to: '/offers', label: 'Offers' },
   { to: '/book-birthday', label: 'Birthday' },
   { to: '/book-event', label: 'Events' },
+  { to: '/contact', label: 'Contact' },
 ];
 
 export default function PublicLayout() {
@@ -33,25 +35,30 @@ export default function PublicLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 border-b border-stone-200/80 bg-white/90 backdrop-blur-md">
-        
-        {/* Cleaned container with controlled responsive heights */}
-        <div className="mx-auto flex max-w-6xl h-16 md:h-24 items-center justify-between gap-4 px-4">
-          <Link to="/" className="flex items-center gap-2">
+
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 border-b border-stone-800/40 bg-stone-950/20 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:h-24">
+
+          {/* LOGO */}
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             <img
               src={logo}
               alt="Relax Station"
-              className="h-12 rounded-xl md:h-16 w-auto object-contain"
+              className="h-10 w-auto rounded-xl object-contain md:h-16"
             />
           </Link>
-          <nav className="hidden items-center gap-6 md:flex">
+
+          {/* DESKTOP NAV */}
+          <nav className="hidden md:flex items-center gap-5 lg:gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`font-medium transition ${
-                  pathname === link.to ? 'text-brand-600' : 'text-stone-600 hover:text-brand-600'
-                }`}
+                className={`text-sm lg:text-base font-medium transition whitespace-nowrap ${pathname === link.to
+                  ? 'text-brand-600'
+                  : 'text-stone-600 hover:text-brand-600'
+                  }`}
               >
                 {link.label}
               </Link>
@@ -59,15 +66,16 @@ export default function PublicLayout() {
           </nav>
         </div>
 
-        {/* Mobile Navigation Row */}
-        <nav className="flex gap-1 overflow-x-auto border-t border-stone-100 px-4 py-2 md:hidden">
+        {/* MOBILE NAV */}
+        <nav className="flex md:hidden overflow-x-auto gap-2 border-t border-stone-100 px-3 py-2 scrollbar-hide">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
-                pathname === link.to ? 'bg-brand-600 text-white' : 'bg-stone-100 text-stone-700'
-              }`}
+              className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${pathname === link.to
+                ? 'bg-brand-600 text-white'
+                : 'bg-stone-100 text-stone-700'
+                }`}
             >
               {link.label}
             </Link>
@@ -75,40 +83,124 @@ export default function PublicLayout() {
         </nav>
       </header>
 
-      <main className="flex-1">
+      {/* MAIN */}
+      <main className="flex-1 w-full overflow-x-hidden">
         <Outlet />
       </main>
 
+      {/* FOOTER */}
       <footer className="mt-auto bg-forest-900 text-stone-300">
         <div className="mx-auto max-w-6xl px-4 py-12">
+
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className="grid gap-8 md:grid-cols-3"
+            className="grid gap-10 md:grid-cols-4"
           >
+
+            {/* BRAND */}
             <div>
-              <h3 className="font-display text-lg font-semibold text-white">{restaurant.name}</h3>
-              <p className="mt-2 text-sm">{restaurant.tagline}</p>
+              <h3 className="font-display text-lg font-semibold text-white">
+                {restaurant.name}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed">
+                {restaurant.tagline}
+              </p>
+
+              {/* SOCIAL ICONS (REAL) */}
+
             </div>
+
+            {/* CONTACT */}
             <div>
               <h4 className="font-semibold text-white">Contact</h4>
               <p className="mt-2 text-sm">{restaurant.address}</p>
-              {restaurant.phone && <p className="text-sm">{restaurant.phone}</p>}
-              {restaurant.email && <p className="text-sm">{restaurant.email}</p>}
+
+              {restaurant.phone && (
+                <p className="text-sm break-words">{restaurant.phone}</p>
+              )}
+
+              {restaurant.email && (
+                <p className="text-sm break-words">{restaurant.email}</p>
+              )}
             </div>
+
+            {/* QUICK LINKS */}
+            <div>
+              <h4 className="font-semibold text-white">Quick Links</h4>
+              <div className="mt-4 items-start flex gap-4 text-lg">
+
+                <a
+                  href="https://www.instagram.com/relaxstation_food_fun"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-pink-400 transition"
+                  aria-label="Instagram"
+                >
+                  <FaInstagram />
+                </a>
+
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-blue-900 transition"
+                  aria-label="Facebook"
+                >
+                  <FaFacebook />
+                </a>
+
+                <a
+                  href="https://tiktok.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-white transition"
+                  aria-label="TikTok"
+                >
+                  <FaTiktok />
+                </a>
+
+              </div>
+            </div>
+
+            {/* VISIT + CREDIT */}
             <div>
               <h4 className="font-semibold text-white">Visit Us</h4>
               <p className="mt-2 text-sm">Kathmandu, Nepal</p>
-              <Link to="/admin/login" className="mt-4 inline-block text-xs text-brand-400 hover:text-brand-300">
-                Admin
-              </Link>
+              {/* <a
+                href="/admin/login"
+                className="mt-3 inline-block text-xs text-brand-400 hover:text-brand-300"
+              >
+                Admin Login
+              </a> */}
+
+
             </div>
+
           </motion.div>
-          <p className="mt-8 border-t border-forest-700 pt-6 text-center text-xs">
-            © {new Date().getFullYear()} Relax Station Food and Fun. All rights reserved.
-          </p>
+
+          {/* BOTTOM BAR */}
+          <div className="mt-10 border-t border-forest-700 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+
+            <p className="text-xs text-stone-400">
+              © {new Date().getFullYear()} {restaurant.name}. All rights reserved.
+            </p>
+
+            <div>
+              <p className="text-xs text-stone-500">
+                Crafted for better dining experiences
+              </p>
+              <p className=" text-xs text-stone-400">
+                Developed by{" "}
+                <span className="font-semibold text-orange-500">C2P</span>
+              </p>
+            </div>
+
+          </div>
+
         </div>
       </footer>
+
     </div>
   );
 }

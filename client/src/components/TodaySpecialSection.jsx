@@ -10,13 +10,26 @@ export default function TodaySpecialSection({ hideViewMore = false }) {
     
     useEffect(() => {
         todaySpecialApi
-            .getToday()
+            .getAll() 
             .then((res) => {
                 const cleanData = Array.isArray(res) ? res : (res?.data || []);
-                setSpecials(cleanData);
+                
+                const todayLocalStr = new Date().toLocaleDateString('en-CA'); 
+                
+                let todayItems = cleanData.filter(s => {
+                    if (!s.special_date) return false;
+                    const dbDateStr = s.special_date.split('T')[0]; 
+                    return dbDateStr === todayLocalStr;
+                });
+
+                if (todayItems.length === 0 && cleanData.length > 0) {
+                    todayItems = cleanData.slice(0, 4);
+                }
+
+                setSpecials(todayItems);
             })
             .catch((err) => {
-                console.error("Failed to load today's specials:", err);
+                console.error("❌ Failed to load today's specials:", err);
                 setSpecials([]);
             })
             .finally(() => setLoading(false));
@@ -31,18 +44,21 @@ export default function TodaySpecialSection({ hideViewMore = false }) {
         );
     }
 
-    // 2. EMPTY STATE (Intentionally hidden if no specials are running today)
+    // 2. EMPTY STATE
     if (!specials || specials.length === 0) {
         return null; 
     }
 
     // 3. SUCCESS STATE
     return (
-        <section className="relative z-10 mx-auto max-w-6xl px-4 py-10 bg-white">
+        <section className="relative z-10 mx-auto max-w-6xl px-4 py-16 bg-white">
             <div className="flex items-end justify-between gap-4 border-b border-stone-100 pb-3">
-                <h2 className="font-display text-2xl font-bold text-forest-900">
-                    🔥 Today&apos;s Specials
-                </h2>
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Fresh Today</p>
+                    <h2 className="font-display text-2xl font-bold text-forest-900 mt-0.5">
+                        🔥 Today&apos;s Specials
+                    </h2>
+                </div>
                 {!hideViewMore && (
                     <Link to="/menu" className="text-sm font-semibold text-brand-600 hover:text-brand-700 transition">
                         View More →
@@ -50,36 +66,65 @@ export default function TodaySpecialSection({ hideViewMore = false }) {
                 )}
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* 🟢 Responsive Grid: 1 col on mobile, 2 on tablet, 3 on laptop, 4 on large screens */}
+            <div className="mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {specials.map((s) => (
                     <div
                         key={s.id}
-                        className="card flex gap-4 border border-brand-200 bg-brand-50 hover:shadow-md transition p-4 rounded-lg items-center"
+                        className="flex flex-col overflow-hidden rounded-3xl border border-stone-100 bg-white shadow-sm transition hover:shadow-md aspect-square"
                     >
-                        {s.item_image && (
-                            <img
-                                src={s.item_image}
-                                alt={s.item_name}
-                                className="h-16 w-16 rounded object-cover shrink-0 border border-brand-100"
-                            />
-                        )}
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-stone-900 truncate">{s.item_name}</h3>
-                            {s.note && <p className="text-sm text-stone-600 mt-1 line-clamp-2">{s.note}</p>}
+                        {/* Upper Half: Image Section */}
+                        <div className="relative flex-1 bg-stone-50 overflow-hidden w-full min-h-0">
+                            {s.item_image || s.image_url ? (
+                                <img
+                                    src={s.item_image || s.image_url}
+                                    alt={s.item_name}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-50 to-stone-100 text-4xl select-none">
+                                    🍽️
+                                </div>
+                            )}
 
-                            <p className="mt-2 font-bold text-brand-700">
-                                {formatPrice(s.special_price || s.regular_price)}
+                            {/* Floating Badge on top of image */}
+                            <span className="absolute top-3 left-3 inline-block rounded-full bg-brand-600/90 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                                🔥 Special
+                            </span>
+                        </div>
 
-                                {s.special_price && (
-                                    <span className="ml-2 text-sm font-normal text-stone-400 line-through">
-                                        {formatPrice(s.regular_price)}
-                                    </span>
+                        {/* Lower Half: Metadata Details Section */}
+                        <div className="p-4 flex flex-col justify-between shrink-0 bg-white border-t border-stone-50 h-[110px]">
+                            <div>
+                                <div className="flex items-start justify-between gap-2">
+                                    <h3 className="font-display font-bold text-stone-900 leading-tight text-sm truncate capitalize flex-1">
+                                        {s.item_name}
+                                    </h3>
+                                    
+                                    <div className="flex flex-col items-end shrink-0">
+                                        <span className="text-sm font-bold text-brand-600">
+                                            {formatPrice(s.special_price || s.regular_price)}
+                                        </span>
+                                        {s.special_price && s.regular_price && (
+                                            <span className="text-[10px] text-stone-400 line-through">
+                                                {formatPrice(s.regular_price)}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {s.note ? (
+                                    <p className="mt-1 text-xs text-stone-500 line-clamp-2 pr-1">
+                                        {s.note}
+                                    </p>
+                                ) : (
+                                    <p className="mt-1 text-xs text-stone-400 italic">Chef's daily selection</p>
                                 )}
-                            </p>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
         </section>
-    );
+    );  
 }
