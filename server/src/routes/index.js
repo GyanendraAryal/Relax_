@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes.js';
 import menuRoutes from './menu.routes.js';
+import menuItemRoutes from './menuItem.routes.js';
 import galleryRoutes from './gallery.routes.js';
 import offerRoutes from './offer.routes.js';
 import todaySpecialRoutes from './todaySpecial.routes.js';
@@ -8,6 +9,7 @@ import bookingRoutes from './booking.routes.js';
 import settingsRoutes from './settings.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
 import pool from '../config/db.js';
+import googleReviewsRoutes from './googleReviews.routes.js';
 
 const router = Router();
 
@@ -25,11 +27,13 @@ router.get('/health', async (_req, res) => {
 
 router.use('/auth', authRoutes);
 router.use('/menu', menuRoutes);
+router.use('/menu-items', menuItemRoutes);
 router.use('/gallery', galleryRoutes);
 router.use('/offers', offerRoutes);
 router.use('/today-specials', todaySpecialRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/google-reviews', googleReviewsRoutes);
 
 export default router;

@@ -6,7 +6,10 @@ dotenv.config();
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(5000),
-  CLIENT_URL: z.string().url(),
+  CLIENT_URLS: z
+    .string()
+    .min(1)
+    .transform((v) => v.split(',').map((u) => u.trim()).filter(Boolean)),
 
   DATABASE_URL: z.string().min(1),
 
