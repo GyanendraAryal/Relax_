@@ -9,6 +9,9 @@ export const offerSchema = z.object({
   image_url: z.string().url().optional().nullable(),
   valid_from: z.string().date().optional().nullable(),
   valid_until: z.string().date().optional().nullable(),
-  is_active: z.boolean().optional(),
+  is_active: z.preprocess(
+    (v) => (v === 'true' ? true : v === 'false' ? false : v),
+    z.boolean().optional()
+  ),
   terms: z.string().optional().nullable(),
 });

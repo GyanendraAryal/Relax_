@@ -16,7 +16,7 @@ export async function getById(id) {
 export async function create(data, file) {
   const slug = data.slug || slugify(data.title);
   const existing = await offerModel.findBySlug(slug);
-  if (existing) throw new ConflictError('Offer slug already exists');
+  if (existing) throw new ConflictError(`An offer with the title "${data.title}" already exists. Use a different title.`);
 
   if (file) {
     const uploaded = await uploadImage(file.buffer, 'relax-station/offers');

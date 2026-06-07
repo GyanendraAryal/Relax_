@@ -12,15 +12,13 @@ export default function Offers() {
   useEffect(() => {
     offersApi.getPublic()
       .then((res) => {
-        console.log("Offers API raw response:", res); // 👈 Debugging log
-        
         // Safely extract array if backend wraps it in a data property
         if (Array.isArray(res)) {
           setOffers(res);
         } else if (res && Array.isArray(res.data)) {
           setOffers(res.data);
         } else {
-          setOffers([]); // Fallback to safe empty array
+          setOffers([]);
         }
       })
       .catch((err) => {

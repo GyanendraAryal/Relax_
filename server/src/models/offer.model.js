@@ -47,35 +47,32 @@ export async function create(data) {
 }
 
 export async function update(id, data) {
-  const { rows } = await pool.query(
-    `UPDATE offers SET
-       title = COALESCE($2, title),
-       slug = COALESCE($3, slug),
-       description = COALESCE($4, description),
-       discount_percent = COALESCE($5, discount_percent),
-       discount_amount = COALESCE($6, discount_amount),
-       image_url = COALESCE($7, image_url),
-       cloudinary_public_id = COALESCE($8, cloudinary_public_id),
-       valid_from = COALESCE($9, valid_from),
-       valid_until = COALESCE($10, valid_until),
-       is_active = COALESCE($11, is_active),
-       terms = COALESCE($12, terms)
-     WHERE id = $1 RETURNING *`,
-    [
-      id,
-      data.title,
-      data.slug,
-      data.description,
-      data.discount_percent,
-      data.discount_amount,
-      data.image_url,
-      data.cloudinary_public_id,
-      data.valid_from,
-      data.valid_until,
-      data.is_active,
-      data.terms,
-    ]
-  );
+  // Build SET clause dynamically — only update columns that are explicitly
+  // present in `data`. This allows callers to clear a value by passing null,
+  // unlike COALESCE which would silently keep the old value when null is passed.
+  const fields = [
+    'title', 'slug', 'description', 'discount_percent', 'discount_amount',
+    'image_url', 'cloudinary_public_id', 'valid_from', 'valid_until',
+    'is_active', 'terms',
+  ];
+
+  const setClauses = [];
+  const params = [id]; // $1 is always the id
+
+  fields.forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(data, field)) {
+      params.push(data[field] ?? null);
+      setClauses.push(`${field} = $${params.length}`);
+    }
+  });
+
+  if (setClauses.length === 0) {
+    // Nothing to update — just return the existing row
+    return findById(id);
+  }
+
+  const sql = `UPDATE offers SET ${setClauses.join(', ')} WHERE id = $1 RETURNING *`;
+  const { rows } = await pool.query(sql, params);
   return rows[0] || null;
 }
 
