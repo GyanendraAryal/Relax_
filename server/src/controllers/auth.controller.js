@@ -6,7 +6,7 @@ export async function login(req, res, next) {
     const { email, password } = req.body;
     const result = await authService.login(email, password);
     authService.setAuthCookie(res, result.token);
-    return success(res, { user: result.user, token: result.token });
+    return success(res, { user: result.user });
   } catch (err) {
     next(err);
   }

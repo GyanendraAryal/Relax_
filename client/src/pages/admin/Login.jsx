@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/useAuth.js';
 import Alert from '../../components/Alert.jsx';
 
 export default function AdminLogin() {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const { login, loading, error, user, clearError } = useAuth();
   const navigate = useNavigate();
   const [localError, setLocalError] = useState('');
@@ -34,16 +34,41 @@ export default function AdminLogin() {
         <h1 className="mt-6 text-2xl font-bold">Admin Sign In</h1>
         <p className="mt-1 text-sm text-stone-500">CMS Dashboard</p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
           <Alert message={error || localError} onClose={() => { clearError(); setLocalError(''); }} />
+
           <div>
             <label className="mb-1 block text-sm font-medium">Email</label>
-            <input type="email" className="input-field" {...register('email', { required: true })} />
+            <input
+              type="email"
+              autoComplete="email"
+              className={`input-field ${errors.email ? 'border-red-400 focus:ring-red-400' : ''}`}
+              {...register('email', {
+                required: 'Email is required',
+                pattern: { value: /\S+@\S+\.\S+/, message: 'Enter a valid email' },
+              })}
+            />
+            {errors.email && (
+              <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+            )}
           </div>
+
           <div>
             <label className="mb-1 block text-sm font-medium">Password</label>
-            <input type="password" className="input-field" {...register('password', { required: true })} />
+            <input
+              type="password"
+              autoComplete="current-password"
+              className={`input-field ${errors.password ? 'border-red-400 focus:ring-red-400' : ''}`}
+              {...register('password', {
+                required: 'Password is required',
+                minLength: { value: 8, message: 'Password must be at least 8 characters' },
+              })}
+            />
+            {errors.password && (
+              <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
+            )}
           </div>
+
           <button type="submit" disabled={loading} className="btn-primary w-full">
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

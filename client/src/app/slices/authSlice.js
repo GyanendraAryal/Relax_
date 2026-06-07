@@ -43,10 +43,12 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
+        state.checked = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.checked = true;
       })
       .addCase(fetchMe.fulfilled, (state, action) => {
         state.user = action.payload;
@@ -58,6 +60,7 @@ const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
+        state.checked = true;
       });
   },
 });

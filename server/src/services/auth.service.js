@@ -35,10 +35,11 @@ export async function login(email, password) {
 }
 
 export function setAuthCookie(res, token) {
+  const isProd = env.NODE_ENV === 'production';
   res.cookie(env.JWT_COOKIE_NAME, token, {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProd,               // must be true when sameSite: 'none'
+    sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-origin (Netlify → Render)
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
