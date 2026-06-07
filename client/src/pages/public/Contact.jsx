@@ -1,124 +1,100 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import Alert from '../../components/Alert.jsx';
 
 export default function Contact() {
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+  const settings = useSelector((s) => s.settings.data);
+  const restaurant = settings?.restaurant || {};
+  const about = settings?.about || {};
+
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Message sent (connect this to backend later)');
+    // No backend contact endpoint — show a friendly confirmation and reset
+    setSubmitted(true);
     setForm({ name: '', email: '', message: '' });
   };
+
+  // Derive display values from settings with sensible fallbacks
+  const address   = restaurant.address  || 'Kalikasthan, Kathmandu, Nepal';
+  const phone     = restaurant.phone    || '';
+  const email     = restaurant.email    || '';
+  const hours     = about.hours         ||
+    (about.openingTime && about.closingTime
+      ? `Daily: ${about.openingTime} – ${about.closingTime}`
+      : 'Daily: 11:00 AM – 10:00 PM');
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14">
 
-      {/* HEADER */}
       <div className="text-center">
-        <h1 className="font-display text-4xl font-bold text-forest-900">
-          Contact Us
-        </h1>
+        <h1 className="font-display text-4xl font-bold text-forest-900">Contact Us</h1>
         <p className="mt-3 text-stone-600 max-w-xl mx-auto">
-          We’re here to help you plan visits, birthdays, and special events at Relax Station.
+          We're here to help you plan visits, birthdays, and special events at Relax Station.
         </p>
       </div>
 
-      {/* GRID */}
       <div className="mt-12 grid gap-10 lg:grid-cols-2">
 
-        {/* LEFT SIDE */}
+        {/* INFO CARDS */}
         <div className="space-y-6">
-
-          {/* LOCATION */}
           <div className="card rounded-2xl border border-stone-100 bg-white p-6 shadow-sm hover:shadow-md transition">
-            <h2 className="text-lg font-semibold text-forest-900">
-              📍 Our Location
-            </h2>
+            <h2 className="text-lg font-semibold text-forest-900">📍 Our Location</h2>
             <p className="mt-2 text-stone-600 leading-relaxed">
-              Relax Station Food and Fun<br />
-              Kalikasthan, Kathmandu, Nepal
+              {restaurant.name || 'Relax Station Food and Fun'}<br />{address}
             </p>
           </div>
 
-          {/* CONTACT */}
           <div className="card rounded-2xl border border-stone-100 bg-white p-6 shadow-sm hover:shadow-md transition">
-            <h2 className="text-lg font-semibold text-forest-900">
-              📞 Contact
-            </h2>
-            <p className="mt-2 text-stone-600">+977-98XXXXXXXX</p>
-            <p className="text-stone-600">info@relaxstation.com</p>
+            <h2 className="text-lg font-semibold text-forest-900">📞 Contact</h2>
+            {phone
+              ? <a href={`tel:${phone}`} className="mt-2 block text-stone-600 hover:text-brand-600 transition">{phone}</a>
+              : <p className="mt-2 text-stone-400 italic text-sm">Phone not set</p>}
+            {email
+              ? <a href={`mailto:${email}`} className="block text-stone-600 hover:text-brand-600 transition">{email}</a>
+              : <p className="text-stone-400 italic text-sm">Email not set</p>}
           </div>
 
-          {/* HOURS */}
           <div className="card rounded-2xl border border-stone-100 bg-white p-6 shadow-sm hover:shadow-md transition">
-            <h2 className="text-lg font-semibold text-forest-900">
-              ⏰ Opening Hours
-            </h2>
-            <p className="mt-2 text-stone-600">
-              Daily: 11:00 AM – 10:00 PM
-            </p>
+            <h2 className="text-lg font-semibold text-forest-900">⏰ Opening Hours</h2>
+            <p className="mt-2 text-stone-600">{hours}</p>
           </div>
-
         </div>
 
-        {/* RIGHT SIDE - FORM */}
-        <form
-          onSubmit={handleSubmit}
-          className="card rounded-2xl border border-stone-100 bg-white p-6 shadow-sm hover:shadow-md transition space-y-4"
-        >
-          <h2 className="text-lg font-semibold text-forest-900">
-            Send a Message
-          </h2>
+        {/* CONTACT FORM */}
+        <form onSubmit={handleSubmit}
+          className="card rounded-2xl border border-stone-100 bg-white p-6 shadow-sm hover:shadow-md transition space-y-4">
+          <h2 className="text-lg font-semibold text-forest-900">Send a Message</h2>
 
-          <input
-            className="input-field focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
-            placeholder="Your Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-          />
+          {submitted && (
+            <Alert type="success"
+              message="Thanks for reaching out! We'll get back to you soon."
+              onClose={() => setSubmitted(false)} />
+          )}
 
-          <input
-            type="email"
-            className="input-field focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
-            placeholder="Your Email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            required
-          />
+          <input className="input-field" placeholder="Your Name" required
+            value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
 
-          <textarea
-            className="input-field h-32 resize-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
-            placeholder="Your Message"
-            value={form.message}
-            onChange={(e) => setForm({ ...form, message: e.target.value })}
-            required
-          />
+          <input type="email" className="input-field" placeholder="Your Email" required
+            value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
 
-          <button
-            type="submit"
-            className="btn-primary w-full py-3 font-semibold shadow-sm hover:shadow-md transition"
-          >
+          <textarea className="input-field h-32 resize-none" placeholder="Your Message" required
+            value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+
+          <button type="submit" className="btn-primary w-full py-3 font-semibold shadow-sm hover:shadow-md transition">
             Send Message
           </button>
         </form>
       </div>
 
-      {/* MAP SECTION */}
+      {/* MAP */}
       <div className="mt-12 rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-md transition">
-
         <div className="bg-white p-5 border-b border-stone-100">
-          <h2 className="text-lg font-semibold text-forest-900">
-            📍 Find Us on Map
-          </h2>
-          <p className="text-sm text-stone-500 mt-1">
-            Visit us easily using Google Maps
-          </p>
+          <h2 className="text-lg font-semibold text-forest-900">📍 Find Us on Map</h2>
+          <p className="text-sm text-stone-500 mt-1">Visit us easily using Google Maps</p>
         </div>
-
         <div className="h-96 w-full">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.4795359273962!2d85.32357929999999!3d27.7024767!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19006e9f193f%3A0x9f5c09a842b906a9!2sRelax%20station%20food%20and%20fun!5e0!3m2!1sen!2snp!4v1780694253175!5m2!1sen!2snp"
@@ -128,7 +104,6 @@ export default function Contact() {
             title="Relax Station Location"
           />
         </div>
-
       </div>
     </div>
   );

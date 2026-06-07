@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { galleryApi } from '../../api/gallery.api.js';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
-import ImageLightbox from '../../components/ImageLightbox.jsx';
+import ImageLightbox from '../../components/ImageLightBox.jsx';
 
 export default function Gallery() {
   const [images, setImages] = useState([]);

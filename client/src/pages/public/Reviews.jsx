@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import api from '../../api/axios.js';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 
 export default function Reviews() {
@@ -6,9 +7,9 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/google-reviews')
-      .then(res => res.json())
-      .then(data => setReviews(data.reviews || []))
+    api.get('/google-reviews')
+      .then((r) => setReviews(r.data.reviews || []))
+      .catch(() => setReviews([]))
       .finally(() => setLoading(false));
   }, []);
 

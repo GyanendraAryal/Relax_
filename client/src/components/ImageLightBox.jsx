@@ -5,15 +5,12 @@ export default function ImageLightbox({ images, index, setIndex, onClose }) {
   if (index === null) return null;
 
   const current = images[index];
+  const total = images.length;
 
-  const next = () => {
-    setIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  const next = () => setIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
+  const prev = () => setIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
 
-  const prev = () => {
-    setIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
+  // index in deps array prevents stale closure — next/prev always use current index
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'Escape') onClose();
@@ -28,7 +25,7 @@ export default function ImageLightbox({ images, index, setIndex, onClose }) {
       window.removeEventListener('keydown', handleKey);
       document.body.style.overflow = 'auto';
     };
-  }, [index]);
+  }, [index, total]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AnimatePresence>
@@ -51,32 +48,28 @@ export default function ImageLightbox({ images, index, setIndex, onClose }) {
           onClick={(e) => e.stopPropagation()}
         />
 
-        {/* close */}
-        <button
-          className="absolute top-5 right-5 text-white text-2xl font-bold"
-          onClick={onClose}
-        >
+        {/* Image counter */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
+          {index + 1} / {total}
+        </div>
+
+        {/* Close */}
+        <button className="absolute top-5 right-5 text-white text-2xl font-bold" onClick={onClose}>
           ✕
         </button>
 
-        {/* prev */}
+        {/* Prev */}
         <button
           className="absolute left-5 text-white text-3xl"
-          onClick={(e) => {
-            e.stopPropagation();
-            prev();
-          }}
+          onClick={(e) => { e.stopPropagation(); prev(); }}
         >
           ‹
         </button>
 
-        {/* next */}
+        {/* Next */}
         <button
           className="absolute right-5 text-white text-3xl"
-          onClick={(e) => {
-            e.stopPropagation();
-            next();
-          }}
+          onClick={(e) => { e.stopPropagation(); next(); }}
         >
           ›
         </button>

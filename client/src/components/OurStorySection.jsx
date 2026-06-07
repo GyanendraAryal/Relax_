@@ -12,8 +12,8 @@ export default function OurStorySection({ story = {} }) {
     backgroundImage = '',
   } = story;
 
-  // Working cloud image fallback to see the blend immediately
-  const liveFallbackImage = "https://unsplash.com";
+  // Empty string means no image — shows bg-stone-100 placeholder via CSS
+  const liveFallbackImage = '';
 
   return (
     <section className="relative bg-gradient-to-b from-white via-stone-50 to-white py-24 overflow-hidden">
@@ -77,11 +77,17 @@ export default function OurStorySection({ story = {} }) {
               className="relative aspect-[3/4] rounded-2xl overflow-hidden group shadow-[-25px_25px_50px_-15px_rgba(0,0,0,0.25)]"
             >
               {/* IMAGE */}
-              <img
-                src={backgroundImage || liveFallbackImage}
-                alt="Relax Station Story"
-                className="h-full w-full object-cover scale-105 transition-transform duration-700 group-hover:scale-110"
-              />
+              {(backgroundImage || liveFallbackImage) ? (
+                <img
+                  src={backgroundImage || liveFallbackImage}
+                  alt="Relax Station Story"
+                  className="h-full w-full object-cover scale-105 transition-transform duration-700 group-hover:scale-110"
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-to-br from-stone-100 to-stone-200 flex items-center justify-center">
+                  <span className="text-6xl select-none opacity-30">🍽️</span>
+                </div>
+              )}
 
               {/* INSET LEFT SHADOW MASK MATCHING STONE-50 GRADIENT */}
               <div 

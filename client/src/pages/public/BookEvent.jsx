@@ -50,7 +50,9 @@ export default function BookEvent() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Event Date *</label>
-            <input type="date" className="input-field" {...register('event_date', { required: 'Required' })} />
+            <input type="date" className="input-field"
+              min={new Date().toISOString().split('T')[0]}
+              {...register('event_date', { required: 'Required' })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

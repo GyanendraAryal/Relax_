@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
+import api from '../api/axios.js';
 
 export default function GoogleReviewSlider() {
   const [reviews, setReviews] = useState([]);
@@ -7,19 +8,10 @@ export default function GoogleReviewSlider() {
   const sliderRef = useRef(null);
 
   useEffect(() => {
-    async function fetchReviews() {
-      try {
-        const res = await fetch('/api/google-reviews');
-        const data = await res.json();
-        setReviews(data.reviews || []);
-      } catch (err) {
-        console.error('Failed to load reviews', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchReviews();
+    api.get('/google-reviews')
+      .then((r) => setReviews(r.data.reviews || []))
+      .catch(() => setReviews([]))
+      .finally(() => setLoading(false));
   }, []);
 
   // AUTO SLIDER
@@ -28,20 +20,14 @@ export default function GoogleReviewSlider() {
     if (!slider || reviews.length === 0) return;
 
     const interval = setInterval(() => {
-      const cardWidth = 316; // 300px card + gap
-
+      const firstCard = slider.querySelector('[data-review-card]');
+      const cardWidth = firstCard ? firstCard.offsetWidth + 16 : 316; // 16 = gap-4
       const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
 
       if (slider.scrollLeft + cardWidth >= maxScrollLeft) {
-        slider.scrollTo({
-          left: 0,
-          behavior: 'smooth',
-        });
+        slider.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
-        slider.scrollBy({
-          left: cardWidth,
-          behavior: 'smooth',
-        });
+        slider.scrollBy({ left: cardWidth, behavior: 'smooth' });
       }
     }, 4000);
 
@@ -75,6 +61,7 @@ export default function GoogleReviewSlider() {
           {reviews.map((r, i) => (
             <motion.div
               key={i}
+              data-review-card
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               className="min-w-[300px] max-w-[300px] bg-white border border-stone-200 rounded-2xl p-5 shadow-sm"
