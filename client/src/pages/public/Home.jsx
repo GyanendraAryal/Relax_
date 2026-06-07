@@ -1,10 +1,7 @@
-import { useEffect, useState } from 'react';
 import OurStorySection from '../../components/OurStorySection.jsx';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
-import { menuApi } from '../../api/menu.api.js';
-import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import TodaySpecialSection from '../../components/TodaySpecialSection.jsx';
 import AdsModal from '../../components/AdsModal.jsx';
 import AboutSection from '../../components/AboutSection.jsx';
@@ -14,18 +11,6 @@ export default function Home() {
   const settings = useSelector((s) => s.settings.data);
   const hero = settings?.hero || {};
   const about = settings?.about || {};
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    menuApi.getPublic()
-      .catch((err) => {
-        console.error("❌ Failed to resolve baseline system configuration rows:", err);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <LoadingSpinner />;
 
   return (
     <>

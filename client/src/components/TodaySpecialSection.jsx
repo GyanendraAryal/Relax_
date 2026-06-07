@@ -10,23 +10,10 @@ export default function TodaySpecialSection({ hideViewMore = false }) {
     
     useEffect(() => {
         todaySpecialApi
-            .getAll() 
+            .getToday()
             .then((res) => {
                 const cleanData = Array.isArray(res) ? res : (res?.data || []);
-                
-                const todayLocalStr = new Date().toLocaleDateString('en-CA'); 
-                
-                let todayItems = cleanData.filter(s => {
-                    if (!s.special_date) return false;
-                    const dbDateStr = s.special_date.split('T')[0]; 
-                    return dbDateStr === todayLocalStr;
-                });
-
-                if (todayItems.length === 0 && cleanData.length > 0) {
-                    todayItems = cleanData.slice(0, 4);
-                }
-
-                setSpecials(todayItems);
+                setSpecials(cleanData);
             })
             .catch((err) => {
                 console.error("❌ Failed to load today's specials:", err);
