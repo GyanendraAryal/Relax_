@@ -10,23 +10,44 @@ export default function Offers() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    offersApi.getPublic().then(setOffers).finally(() => setLoading(false));
+    offersApi.getPublic()
+      .then((res) => {
+        console.log("Offers API raw response:", res); // 👈 Debugging log
+        
+        // Safely extract array if backend wraps it in a data property
+        if (Array.isArray(res)) {
+          setOffers(res);
+        } else if (res && Array.isArray(res.data)) {
+          setOffers(res.data);
+        } else {
+          setOffers([]); // Fallback to safe empty array
+        }
+      })
+      .catch((err) => {
+        console.error("Offers API network error:", err);
+        setOffers([]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <LoadingSpinner />;
+
+  // Safely guard against null/undefined data values
+  const safeOffers = Array.isArray(offers) ? offers : [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="font-display text-3xl font-bold text-forest-900">Special Offers</h1>
       <p className="mt-2 text-stone-600">Save more on your next visit</p>
 
-      {offers.length === 0 ? (
+      {/* FIXED: Uses the safe fallback array */}
+      {safeOffers.length === 0 ? (
         <EmptyState title="No active offers" description="Follow us for upcoming deals!" />
       ) : (
         <div className="mt-10 grid gap-8 md:grid-cols-2">
-          {offers.map((offer) => (
+          {safeOffers.map((offer, i) => (
             <motion.article
-              key={offer.id}
+              key={offer.id || i}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
