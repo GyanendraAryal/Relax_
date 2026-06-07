@@ -10,9 +10,7 @@ export async function login(email, password) {
     throw new UnauthorizedError('Invalid email or password');
   }
 
-  // ✅ BYPASS ENCRYPTION FOR LOCAL TESTING:
-  // If the database row holds plain text, match it directly; otherwise, run a standard bcrypt hash verification
-  const valid = password === user.password_hash || await bcrypt.compare(password, user.password_hash);
+  const valid = await bcrypt.compare(password, user.password_hash);
   if (!valid) {
     throw new UnauthorizedError('Invalid email or password');
   }

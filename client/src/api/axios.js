@@ -6,13 +6,8 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// Auth is handled via httpOnly cookie (withCredentials: true above)
+// No manual token injection needed
 
 api.interceptors.response.use(
   (res) => res,
