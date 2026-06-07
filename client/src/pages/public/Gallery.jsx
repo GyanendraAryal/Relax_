@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { galleryApi } from '../../api/gallery.api.js';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
-import ImageLightbox from '../../components/ImageLightBox.jsx';
+// Adjusted to lowercase 'b' to stay aligned with the Netlify fix
+import ImageLightbox from '../../components/ImageLightbox.jsx'; 
 
 export default function Gallery() {
   const [images, setImages] = useState([]);
@@ -11,15 +12,35 @@ export default function Gallery() {
   const [activeIndex, setActiveIndex] = useState(null);
 
   useEffect(() => {
-    galleryApi.getPublic().then(setImages).finally(() => setLoading(false));
+    galleryApi.getPublic()
+      .then((res) => {
+        console.log("Gallery API raw response:", res); // 👈 Helpful debugging log
+        
+        // Safely extract the array if your API wraps it inside a data property
+        if (Array.isArray(res)) {
+          setImages(res);
+        } else if (res && Array.isArray(res.data)) {
+          setImages(res.data);
+        } else {
+          setImages([]); // Fallback to avoid 'undefined' crashes
+        }
+      })
+      .catch((err) => {
+        console.error("Gallery API network error:", err);
+        setImages([]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <LoadingSpinner />;
 
+  // Safely guard against null/undefined values
+  const safeImages = Array.isArray(images) ? images : [];
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-14">
       
-      {/* HEADER (slightly refined typography spacing) */}
+      {/* HEADER */}
       <h1 className="font-display text-4xl font-bold text-forest-900 tracking-tight">
         Gallery
       </h1>
@@ -27,11 +48,12 @@ export default function Gallery() {
         Moments from Relax Station — captured experiences, vibes & memories
       </p>
 
-      {images.length === 0 ? (
+      {/* FIXED: Safe fallback check */}
+      {safeImages.length === 0 ? (
         <EmptyState title="No photos yet" />
       ) : (
         <div className="mt-12 columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-          {images.map((img, i) => {
+          {safeImages.map((img, i) => {
 
             const heightClass =
               i % 7 === 0 ? 'aspect-[4/5]' :
@@ -41,7 +63,7 @@ export default function Gallery() {
 
             return (
               <motion.figure
-                key={img.id}
+                key={img.id || i}
                 onClick={() => setActiveIndex(i)}
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -111,9 +133,9 @@ export default function Gallery() {
         </div>
       )}
 
-      {/* LIGHTBOX (unchanged logic) */}
+      {/* LIGHTBOX */}
       <ImageLightbox
-        images={images}
+        images={safeImages}
         index={activeIndex}
         setIndex={setActiveIndex}
         onClose={() => setActiveIndex(null)}
