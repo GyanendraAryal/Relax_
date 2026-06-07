@@ -115,11 +115,28 @@ export default function MenuMgmt() {
     loadItems();
   };
 
-  const handleClearSearch = () => {
+  const handleClearSearch = async () => {
     setSearch('');
     setPage(1);
-    // Timeout to wait for state to update, or pass it directly
-    setTimeout(() => loadItems(), 0);
+    // Call API directly with empty search — avoids stale closure on loadItems
+    setItemsLoading(true);
+    try {
+      const response = await menuApi.getItems({
+        search: undefined,
+        category_id: categoryIdFilter || undefined,
+        sortBy,
+        sortOrder,
+        page: 1,
+        limit,
+      });
+      setItems(response.data || []);
+      setTotalItems(response.meta?.total || 0);
+      setTotalPages(response.meta?.totalPages || 1);
+    } catch (err) {
+      showToast(err.message || 'Failed to load items', 'error');
+    } finally {
+      setItemsLoading(false);
+    }
   };
 
   // Toggle availability action on table row

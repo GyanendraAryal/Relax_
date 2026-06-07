@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { todaySpecialApi } from '../../api/todaySpecial.api.js';
 import { menuApi } from '../../api/menu.api.js';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
+import Alert from '../../components/Alert.jsx';
+import ConfirmModal from '../../components/ConfirmModal.jsx';
 import { formatPrice, formatDate } from '../../utils/format.js';
 
 export default function TodaySpecial() {
   const [specials, setSpecials] = useState([]);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [alert, setAlert] = useState({ message: '', type: 'success' });
+  const [confirmTarget, setConfirmTarget] = useState(null); // special to delete
   
   // 🟢 FIXED: Properly access index [0] to supply a valid ISO date string
   const [form, setForm] = useState({
@@ -45,7 +49,6 @@ export default function TodaySpecial() {
         special_date: form.special_date,
       }, file);
       
-      // Reset layout forms completely back to default values
       setForm({
         menu_item_id: '',
         special_price: '',
@@ -53,24 +56,25 @@ export default function TodaySpecial() {
         special_date: new Date().toISOString().split('T')[0],
       });
       setFile(null);
-      
-      // Reset the file input DOM element if present
       const fileInput = document.getElementById('special-file-upload');
       if (fileInput) fileInput.value = '';
-
       await load();
+      setAlert({ message: 'Special added successfully', type: 'success' });
     } catch (err) {
-      console.error("❌ Failed to commit new promo item entry:", err);
+      setAlert({ message: err.message || 'Failed to add special', type: 'error' });
     }
   };
 
-  const remove = async (id) => {
-    if (!confirm("Are you sure you want to remove this today's special?")) return;
+  const remove = async () => {
+    if (!confirmTarget) return;
     try {
-      await todaySpecialApi.delete(id);
+      await todaySpecialApi.delete(confirmTarget.id);
       await load();
+      setAlert({ message: `Removed "${confirmTarget.item_name}"`, type: 'success' });
     } catch (err) {
-      console.error("❌ Failed to clean up special identifier node:", err);
+      setAlert({ message: err.message || 'Failed to remove special', type: 'error' });
+    } finally {
+      setConfirmTarget(null);
     }
   };
 
@@ -82,6 +86,8 @@ export default function TodaySpecial() {
         <h1 className="text-2xl font-bold text-stone-900">Today&apos;s Special Dashboard</h1>
         <p className="text-sm text-stone-500 mt-1">Manage active promotional kitchen items and custom pricing metrics.</p>
       </div>
+
+      <Alert type={alert.type} message={alert.message} onClose={() => setAlert({ message: '', type: 'success' })} />
 
       <form onSubmit={onSubmit} className="card max-w-lg space-y-4 bg-white border border-stone-200 p-6 rounded-2xl shadow-sm">
         <div>
@@ -209,7 +215,7 @@ export default function TodaySpecial() {
                   <div className="pt-2 mt-1 border-t border-stone-100 flex justify-end">
                     <button 
                       type="button" 
-                      onClick={() => remove(s.id)} 
+                      onClick={() => setConfirmTarget(s)} 
                       className="text-xs font-semibold text-red-600 hover:text-red-700 hover:underline transition"
                     >
                       Remove Special
@@ -222,6 +228,16 @@ export default function TodaySpecial() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!confirmTarget}
+        title="Remove Special"
+        message={`Remove "${confirmTarget?.item_name}" from today's specials? This cannot be undone.`}
+        confirmLabel="Remove"
+        danger
+        onConfirm={remove}
+        onCancel={() => setConfirmTarget(null)}
+      />
     </div>
   );
 }

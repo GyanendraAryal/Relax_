@@ -96,17 +96,35 @@ export default function AdminLayout() {
       <div className="flex flex-1 flex-col h-full overflow-hidden">
 
         {/* MOBILE HEADER */}
-        <header className="flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3 lg:hidden shrink-0">
-          <span className="font-semibold text-stone-800">
-            Admin Console
-          </span>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="text-sm font-medium text-brand-600"
-          >
-            Sign out
-          </button>
+        <header className="flex flex-col border-b border-stone-200 bg-white lg:hidden shrink-0">
+          <div className="flex items-center justify-between px-4 py-3">
+            <span className="font-semibold text-stone-800">Admin Console</span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-sm font-medium text-brand-600"
+            >
+              Sign out
+            </button>
+          </div>
+          <nav className="flex overflow-x-auto gap-1.5 px-3 pb-2.5 scrollbar-hide">
+            {sidebarLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                className={({ isActive }) =>
+                  `shrink-0 rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap transition ${
+                    isActive
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
         </header>
 
         {/* CONTENT */}
