@@ -183,8 +183,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers: DROP IF EXISTS before CREATE so re-runs are safe
--- (CREATE TRIGGER has no IF NOT EXISTS in PostgreSQL < 17)
+-- ---------------------------------------------------------------------------
+-- Triggers Execution Block
+-- ---------------------------------------------------------------------------
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_users_updated') THEN
     CREATE TRIGGER trg_users_updated BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION set_updated_at();
@@ -204,11 +205,11 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_today_specials_updated') THEN
     CREATE TRIGGER trg_today_specials_updated BEFORE UPDATE ON today_specials FOR EACH ROW EXECUTE FUNCTION set_updated_at();
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_birthday_updated') THEN
-    CREATE TRIGGER trg_birthday_updated BEFORE UPDATE ON birthday_requests FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_birthday_requests_updated') THEN
+    CREATE TRIGGER trg_birthday_requests_updated BEFORE UPDATE ON birthday_requests FOR EACH ROW EXECUTE FUNCTION set_updated_at();
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_event_updated') THEN
-    CREATE TRIGGER trg_event_updated BEFORE UPDATE ON event_requests FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_event_requests_updated') THEN
+    CREATE TRIGGER trg_event_requests_updated BEFORE UPDATE ON event_requests FOR EACH ROW EXECUTE FUNCTION set_updated_at();
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_site_settings_updated') THEN
     CREATE TRIGGER trg_site_settings_updated BEFORE UPDATE ON site_settings FOR EACH ROW EXECUTE FUNCTION set_updated_at();
@@ -216,10 +217,8 @@ DO $$ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
--- Seed default site settings (only if not already present)
+-- Idempotent Default Seed Data
 -- ---------------------------------------------------------------------------
-INSERT INTO site_settings (key, value) VALUES
-  ('restaurant', '{"name":"Relax Station Food and Fun","tagline":"Food, Fun & Memories in Kathmandu","address":"Kathmandu, Nepal","phone":"+977-1-XXXXXXX","email":"info@relaxstation.np","hours":{"monday":"10:00 - 22:00","tuesday":"10:00 - 22:00","wednesday":"10:00 - 22:00","thursday":"10:00 - 22:00","friday":"10:00 - 23:00","saturday":"10:00 - 23:00","sunday":"10:00 - 22:00"},"social":{"facebook":"","instagram":"","tiktok":""}}'::jsonb),
-  ('hero', '{"title":"Welcome to Relax Station","subtitle":"Nepal''s favorite spot for great food and family fun","ctaText":"View Menu","ctaLink":"/menu","backgroundImage":""}'::jsonb),
-  ('about', '{"title":"About Us","content":"Relax Station Food and Fun is a family-friendly restaurant in Kathmandu offering delicious Nepali and international cuisine, birthday packages, and event hosting."}'::jsonb)
+INSERT INTO site_settings (key, value)
+VALUES ('business_info', '{"name": "Relax Station Food and Fun", "currency": "USD"}')
 ON CONFLICT (key) DO NOTHING;
