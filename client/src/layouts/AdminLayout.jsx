@@ -21,7 +21,7 @@ export default function AdminLayout() {
     if (!checked) {
       fetchMe();
     }
-  }, []);
+  }, [checked]);
 
   useEffect(() => {
     if (checked && !user) {

@@ -6,6 +6,10 @@ export default function GoogleReviewSlider() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const sliderRef = useRef(null);
+  const intervalRef = useRef(null);
+  // Track whether user is manually scrolling so we can reset the timer
+  const userScrollingRef = useRef(false);
+  const userScrollTimerRef = useRef(null);
 
   useEffect(() => {
     api.get('/google-reviews')
@@ -14,14 +18,21 @@ export default function GoogleReviewSlider() {
       .finally(() => setLoading(false));
   }, []);
 
-  // AUTO SLIDER
+  // ── Auto-slider ───────────────────────────────────────────────────────────
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider || reviews.length === 0) return;
 
-    const interval = setInterval(() => {
-      const firstCard = slider.querySelector('[data-review-card]');
-      const cardWidth = firstCard ? firstCard.offsetWidth + 16 : 316; // 16 = gap-4
+    const getCardWidth = () => {
+      const first = slider.querySelector('[data-review-card]');
+      return first ? first.offsetWidth + 16 : 316; // 16 = gap-4
+    };
+
+    const tick = () => {
+      // Don't auto-scroll if tab is hidden or user is manually scrolling
+      if (document.hidden || userScrollingRef.current) return;
+
+      const cardWidth = getCardWidth();
       const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
 
       if (slider.scrollLeft + cardWidth >= maxScrollLeft) {
@@ -29,9 +40,42 @@ export default function GoogleReviewSlider() {
       } else {
         slider.scrollBy({ left: cardWidth, behavior: 'smooth' });
       }
-    }, 4000);
+    };
 
-    return () => clearInterval(interval);
+    const startInterval = () => {
+      clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(tick, 4000);
+    };
+
+    // Detect manual scrolling — pause auto-scroll for 6s after user touches it
+    const handleScroll = () => {
+      userScrollingRef.current = true;
+      clearTimeout(userScrollTimerRef.current);
+      userScrollTimerRef.current = setTimeout(() => {
+        userScrollingRef.current = false;
+      }, 6000);
+    };
+
+    // Pause when tab is hidden, resume when visible
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        clearInterval(intervalRef.current);
+      } else {
+        startInterval();
+      }
+    };
+
+    slider.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    startInterval();
+
+    return () => {
+      clearInterval(intervalRef.current);
+      clearTimeout(userScrollTimerRef.current);
+      slider.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [reviews]);
 
   if (loading) {
@@ -62,18 +106,24 @@ export default function GoogleReviewSlider() {
             <motion.div
               key={i}
               data-review-card
+              // Use animate (not whileInView) — cards inside a scroll container
+              // don't work reliably with IntersectionObserver-based whileInView
               initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
               className="min-w-[300px] max-w-[300px] bg-white border border-stone-200 rounded-2xl p-5 shadow-sm"
             >
               <div className="flex items-center">
                 <img
-                  src={r.profile_photo_url || "/avatar-fallback.png"}
+                  src={r.profile_photo_url || '/avatar-fallback.svg'}
+                  // Do NOT use referrerPolicy="no-referrer" — Google's CDN
+                  // uses the referrer to validate requests. Stripping it causes 403s.
+                  // Fall back to placeholder on any load error instead.
                   onError={(e) => {
-                    e.target.src = "/avatar-fallback.png";
+                    e.currentTarget.onerror = null; // prevent infinite retry loop
+                    e.currentTarget.src = '/avatar-fallback.svg';
                   }}
-                  referrerPolicy="no-referrer"
-                  alt={r.author_name || "User"}
+                  alt={r.author_name || 'User'}
                   className="w-10 h-10 rounded-full object-cover border border-stone-100 mr-3 shrink-0 bg-stone-50"
                 />
 
@@ -87,7 +137,7 @@ export default function GoogleReviewSlider() {
                 </div>
 
                 <div className="flex items-center text-yellow-400 text-xs shrink-0 self-start mt-0.5 ml-2">
-                  {"★".repeat(Math.round(r.rating || 5))}
+                  {'★'.repeat(Math.round(r.rating || 5))}
                 </div>
               </div>
 

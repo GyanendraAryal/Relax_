@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { bookingsApi } from '../../api/bookings.api.js';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import ConfirmModal from '../../components/ConfirmModal.jsx';
@@ -28,11 +28,11 @@ export default function EventRequests() {
   const [filter, setFilter] = useState('');
   const [confirm, setConfirm] = useState(null);
 
-  const load = () =>
+  const load = useCallback(() =>
     bookingsApi.listEvents({ page: 1, limit: 50, status: filter || undefined })
-      .then((r) => setItems(r.items));
+      .then((r) => setItems(r.items)), [filter]);
 
-  useEffect(() => { load().finally(() => setLoading(false)); }, [filter]);
+  useEffect(() => { load().finally(() => setLoading(false)); }, [load]);
 
   const applyStatus = async (id, status) => {
     await bookingsApi.updateEvent(id, { status });
