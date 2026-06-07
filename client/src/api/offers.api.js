@@ -1,7 +1,9 @@
 import api, { toFormData } from './axios.js';
 
 export const offersApi = {
-  getPublic: () => api.get('/offers/public').then((r) => r.data.data),
+  getPublic: () => api.get('/offers/public').then((r) => {
+    return r?.data?.data !== undefined ? r.data.data : r?.data;
+  }),
   getAll: () => api.get('/offers').then((r) => r.data.data),
   create: (data, file) => {
     const form = toFormData(data);
