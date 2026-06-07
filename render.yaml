@@ -1,0 +1,76 @@
+# render.yaml — Render.com deployment configuration
+# Docs: https://render.com/docs/yaml-spec
+#
+# HOW TO USE:
+#   1. Push this repo to GitHub
+#   2. In Render dashboard → New → Blueprint → connect the repo
+#   3. Render reads this file and creates the API service automatically
+#   4. Go to the service → Environment, and fill in the secret values
+#      marked with sync: false
+#
+# The React frontend is deployed separately to Netlify (see client/netlify.toml)
+
+services:
+  - type: web
+    name: relax-station-api
+    runtime: node
+    rootDir: server
+    plan: free            # change to 'starter' for always-on (no spin-down)
+    buildCommand: npm ci --omit=dev
+    startCommand: node db/migrate.js && node src/server.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Render injects PORT automatically; no need to set it manually.
+      # Your server already reads it via env.PORT — this is fine.
+
+      - key: DATABASE_URL
+        sync: false        # paste your Neon (or other) connection string here
+
+      - key: JWT_SECRET
+        generateValue: true   # Render auto-generates a secure random value on first deploy
+                               # Or set sync: false and paste your own 48-char hex string
+
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+      - key: JWT_COOKIE_NAME
+        value: relax_station_token
+
+      - key: CLIENT_URLS
+        sync: false        # set to your Netlify URL, e.g. https://relaxstation.netlify.app
+                           # multiple origins: https://relaxstation.netlify.app,https://relaxstation.np
+
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+
+      - key: CLOUDINARY_API_KEY
+        sync: false
+
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      - key: REDIS_ENABLED
+        value: 'false'     # set to 'true' only if you add a Redis instance
+
+      - key: REDIS_URL
+        sync: false        # only needed when REDIS_ENABLED=true
+
+      - key: SENTRY_DSN
+        sync: false
+
+      - key: SENTRY_ENVIRONMENT
+        value: production
+
+      - key: RATE_LIMIT_WINDOW_MS
+        value: '900000'
+
+      - key: RATE_LIMIT_MAX
+        value: '100'
+
+      - key: AUTH_RATE_LIMIT_MAX
+        value: '10'

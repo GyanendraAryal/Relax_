@@ -1,0 +1,53 @@
+# netlify.toml — Netlify deployment configuration
+# Docs: https://docs.netlify.com/configure-builds/file-based-configuration/
+#
+# HOW TO USE:
+#   1. Push this repo to GitHub
+#   2. In Netlify dashboard → Add new site → Import from Git → select this repo
+#   3. Set base directory to "client"
+#   4. Netlify reads this file for build settings automatically
+#   5. Go to Site settings → Environment variables and add VITE_API_URL
+#      pointing to your Render API URL (see below)
+
+[build]
+  base    = "client"
+  command = "npm ci && npm run build"
+  publish = "dist"
+
+# ── SPA routing ───────────────────────────────────────────────────────────
+# Redirect all routes to index.html so React Router handles them
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ── Cache headers ─────────────────────────────────────────────────────────
+# Vite fingerprints JS/CSS filenames — safe to cache forever
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML and other root files should not be cached
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ── Security headers ──────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options       = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy       = "strict-origin-when-cross-origin"
+
+# ── Environment variables ─────────────────────────────────────────────────
+# VITE_* vars are baked into the bundle at build time.
+# Set VITE_API_URL in the Netlify dashboard, not here, so it stays out of git.
+#
+# Required:
+#   VITE_API_URL = https://relax-station-api.onrender.com/api
+#
+# Optional:
+#   VITE_SENTRY_DSN = your_sentry_dsn
